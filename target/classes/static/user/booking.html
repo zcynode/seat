@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <title>预约</title>
+    <script src="../lib/jquery-3.4.1.js"></script>
+    <script src="../lib/constant.js"></script>
+    <script src="../lib/layui/layui.all.js"></script>
+    <link rel="stylesheet" href="../lib/layui/css/layui.css">
+</head>
+<body>
+<fieldset class="layui-elem-field layui-field-title" style="margin-top: 50px;">
+    <legend>自习室预约</legend>
+</fieldset>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">日期选择</label>
+            <div class="layui-input-block">
+                <input type="text" name="date" id="date1" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label class="layui-form-label">开始时间</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="start" placeholder="请选择开始时间">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <label class="layui-form-label">结束时间</label>
+            <div class="layui-input-inline">
+                <input type="text" class="layui-input" id="end" placeholder="请选择结束时间">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预约教室</label>
+        <div class="layui-input-inline">
+            <select name="quiz1" id="quiz1" onchange="changeFun(this.options[this.options.selectedIndex].value)" >
+                <option value="">请选择教室</option>
+                <option value="1">A102</option>
+                <option value="2">A103</option>
+                <option value="3">A104</option>
+            </select>
+        </div>
+        <div class="layui-input-inline">
+            <select name="quiz2" id="quiz2">
+                <option value="">请选择桌子排数</option>
+                <option value="1">第一排</option>
+                <option value="2">第二排</option>
+                <option value="3">第三排</option>
+            </select>
+        </div>
+        <div class="layui-input-inline">
+            <select name="quiz3" id="quiz3">
+                <option value="">请选择桌子列数</option>
+                <option value="1">第一列</option>
+                <option value="2">第二列</option>
+                <option value="3">第三列</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button id="button" class="layui-btn" lay-submit="" lay-filter="demo2">预定</button>
+    </div>
+
+
+    <div class="layui-form">
+        <table id="demo" class="layui-table">
+
+        </table>
+    </div>
+</form>
+</body><script src="../lib/layui/layui.js"></script>
+
+<script>
+    var tele;
+    $(function () {
+        $.ajax({
+            type: 'get',
+            url: RequestURL + '/room/getRoomsBySchool',
+            success: function (result) {
+                $(result.data).each(function (){
+                    $("#quiz1").append("<option value=" + this +">" +this + "</option>")
+                })
+            }
+        });
+    });
+</script>
+
+<script>
+    layui.use('table', function(){
+
+
+        table = layui.table;
+        //第一个实例
+        tableIns=table.render({
+            elem: '#demo'
+            ,width: 1150
+            ,height: 700
+            ,url: '/order/getOrders' //数据接口
+            ,page: true //开启分页
+            ,limit: 10
+            ,cols: [[ //表头
+                {field: 'num', title: '订单号', fixed: 'left',width:150}
+                ,{field: "date", title: '订单日期',width:200}
+                ,{field: "room", title: '教室号',width:100}
+                ,{field: "tablenum", title: '桌号',width:100}
+                ,{field: "starttime", title: '开始时间',width:220}
+                ,{field: "endtime", title: '结束时间',width:220}
+            ]]
+        });
+    });
+</script>
+
+
+<script>
+    layui.use(['form',  'laydate'], function(){
+        var form = layui.form
+            ,layer = layui.layer
+            ,laydate = layui.laydate;
+
+        //日期
+        laydate.render({
+            elem: '#date'
+        });
+        laydate.render({
+            elem: '#date1'
+        });
+
+        //监听提交
+        form.on('submit(demo1)', function(data){
+            layer.alert(JSON.stringify(data.field), {
+                title: '预约信息'
+            })
+            return false;
+        });
+        //时间选择
+        laydate.render({
+            elem: '#start'
+            ,type: 'time'
+            ,format: 'H点m分'
+        });
+
+        laydate.render({
+            elem: '#end'
+            ,type: 'time'
+            ,format: 'H点m分'
+        });
+        // //表单取值
+        // layui.$('#LAY-component-form-getval').on('click', function(){
+        //     var data = form.val('example');
+        //     alert(JSON.stringify(data));
+        // });
+
+    });
+</script>
+
+<script>
+    $(function(){
+        $("select[name='quiz1']").change(function(){
+
+            changeFun(this.options[this.options.selectedIndex].value);
+
+        })
+
+    })
+</script>
+
+<script  type="text/javascript">
+    function changeFun(value){
+        $(function () {
+            $.ajax({
+                type: 'get',
+                url: RequestURL + '/table/getabletable',
+                data: value,
+                success: function (result) {
+                    $(result.data).each(function (){
+                        let loc = this.indexof(";");
+                        let x = loc.substring(0,loc);
+                        let y = loc.substring(loc+1,loc.sizeof);
+                        $("#quiz2").append("<option value=" + x +">" +"第" + x + "排" + "</option>")
+                        $("#quiz3").append("<option value=" + y +">" +"第" + y + "列" + "</option>")
+                    })
+                }
+            });
+        });
+    }
+</script>
+
+<script>
+    $("#button").click(function () {
+        let date = $("#date1").val().trim();
+        let starttime = $("#start").val().trim();
+        let endtime = $("#end").val().trim();
+        let room = $("#quiz1").val().trim();
+        let x = $("#quiz2").val().trim();
+        let y = $("#quiz3").val().trim();
+        if (date == '' || date == null) {
+            alert("日期不能为空");
+            return false;
+        }else if (starttime == '' || starttime == null) {
+            alert("开始时间不能为空");
+            return false;
+        }else if (endtime == '' || endtime == null){
+            alert("结束时间不能为空");
+            return false;
+        }else if (x == '' || x == null){
+            alert("桌子行数不能为空");
+            return false;
+        }else if (y == '' || y == null){
+            alert("桌子列数不能为空");
+            return false;
+        }else if (room == '' || room == null){
+            alert("教室号不能为空");
+            return false;
+        }
+        $.ajax({
+            type: 'post',
+            url: RequestURL + '/order/makeorder',
+            data: {
+                "date": date,
+                "starttime": starttime,
+                "endtime": endtime,
+                "x": x,
+                "room": room,
+                "y": y,
+            },
+            success: function (data) {
+                if (data.code == 200){
+                    alert(data.msg);
+                    // location.reload()
+                }else {
+                    alert(data.msg);
+                }
+
+            }
+        });
+    });
+</script>
+
+    </html>

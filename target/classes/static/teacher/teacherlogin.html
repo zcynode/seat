@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+  <meta charset="UTF-8">
+  <title>老师注册</title>
+  <script src="../lib/constant.js"></script>
+  <script src="../lib/jquery-3.4.1.js"></script>
+  <script src="../lib/ajax.js"></script>
+  <script src="../lib/layui/layui.all.js"></script>
+  <link rel="stylesheet" href="../lib/layui/css/layui.css">
+  <link rel="stylesheet" href="../lib/layui/css/teacherlogin.css">
+  <style>
+    #msg{
+      width:266px;
+      position: fixed;
+      z-index:999;
+      top: 49%;
+      margin-top:-80px;
+      left:50%;
+      margin-left:-133px;
+      background:#fff;
+      box-shadow:5px 5px 8px #999;
+      font-size:17px;
+      color:#666;
+      border:1px solid #f8f8f8;
+      text-align: center;
+      line-height: 2rem;
+      display:inline-block;
+      padding-bottom:20px;
+      border-radius:2px;
+    }
+    #msg_top{
+      background:#f8f8f8;
+      padding:5px 15px 5px 20px;
+      text-align:left;
+    }
+    #msg_top span{
+      font-size:22px;
+      float:right;
+      cursor:pointer;
+    }
+    #msg_cont{
+      padding:15px 20px 20px;
+      text-align:left;
+    }
+    #msg_clear{
+      display:inline-block;
+      color:#fff;
+      padding:1px 15px;
+      background:#8fc31f;
+      border-radius:2px;
+      float:right;
+      margin-right:15px;
+      cursor:pointer;
+    }
+    .select{
+      margin-top:0px;
+      outline:none;
+      border:1px solid #BBBBBB;
+      border-radius:4px;
+      position:relative;
+      width:170px;
+    }
+    .text{
+      height:40px;
+      -webkit-appearance:none;
+      appearance:none;
+      border:none;
+      font-size:18px;
+      padding:0px 10px;
+      display:block;
+      width:100%;
+      -webkit-box-sizing:border-box;
+      box-sizing:border-box;
+      background-color:#FFFFFF;
+      color:#333333;
+      border-radius:4px;
+    }
+    .text:hover{
+      color: #1d5971;
+    }
+  </style>
+  <script>
+    window.alert =alert;
+    function alert(e){
+      $("body").append('<div id="msg"><div id="msg_top">提示<span class="msg_close">×</span></div><div id="msg_cont">'+e+'</div><div class="msg_close" id="msg_clear">确定</div></div>');
+      $(".msg_close").click(function (){
+        $("#msg").remove();
+      });
+    }
+  </script>
+</head>
+<body>
+<div class="background">
+  <div class="content">
+    <div class="form sign-in">
+      <h2>欢迎回来</h2>
+      <label>
+        <span>账号</span>
+        <input type="text" id="user" />
+      </label>
+      <label>
+        <span>密码</span>
+        <input type="password" id="password" />
+      </label>
+      <button type="button" class="submit" onclick="userLogin()">登 录</button>
+    </div>
+    <div class="sub-cont">
+      <div class="img">
+        <div class="img__text m--up">
+          <h2>还未注册？</h2>
+          <p>立即注册，加入我们！</p>
+        </div>
+        <div class="img__text m--in">
+          <h2>已有帐号？</h2>
+          <p>有帐号就登录吧，好久不见了！</p>
+        </div>
+        <div class="img__btn">
+          <span class="m--up">注 册</span>
+          <span class="m--in">登 录</span>
+        </div>
+      </div>
+      <div class="form sign-up">
+        <h2>立即注册</h2>
+        <label>
+          <span>用户名</span>
+          <input type="text" id="username" placeholder="请输入用户名">
+          <!--                <div class="invisible"  id="usernameF">用户名不能为空</div>-->
+        </label>
+        <label>
+          <span>密码</span>
+          <input type="password" id="newpassword" placeholder="请输入密码">
+          <!--                <div class="invisible" id="passwordF">密码不能为空</div>-->
+        </label>
+        <label>
+        <span>确认密码</span>
+        <input type="password" id="repassword" placeholder="请再次输入密码" onkeyup="validate()">
+        <span id="tishi"></span>
+        </label>
+        <label>
+          <span>邮箱</span>
+          <input type="email" id="email"/>
+        </label>
+        <label>
+          <span>手机号</span>
+          <input type="tel" id="phone"/>
+        </label>
+        <label>
+          <span>学校</span>
+          <div class="layui-input-inline select" id="school">
+            <select class="text" id="schoolselected">
+              <option value ="青岛大学">青岛大学</option>
+              <option value ="海洋大学">海洋大学</option>
+              <option value="青岛理工大学">青岛理工大学</option>
+              <option value="青岛科技大学">青岛科技大学</option>
+            </select>
+          </div>
+        </label>
+        <button type="button" class="submit" onclick="check1();check2();teacherRegiste();checkphone();checkemail()">注 册</button>
+<!--        <button type="reset" class="submit">重 置</button>-->
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="../lib/layui/login.js"></script>
+
+<script>
+
+  function userLogin(){
+    let name = $("#user").val().trim();
+    let pwd = $("#password").val().trim();
+    if(check(username,password)){
+      var obj = JSON.stringify({
+        "username":name,
+        "password":pwd
+      })
+      $.ajax({
+        async: true,
+        type:'post',
+        url:"/teacher/login",
+        // url: "/user/login",
+        data: obj,
+        contentType:"application/json",
+        success: function(result) {
+          if(result.code==200){
+            // addCookie("id",result.data.id,7200);
+            // addCookie("username",result.data.username,7200)
+            //获取token
+            // var req = new XMLHttpRequest();
+            // req.open('GET', document.location, false);
+            // req.send(null);
+            // let token = req.getResponseHeader("Authorization");
+            // setCookie("token",token,7200);
+            window.location.href="teacherhome.html";
+            // window.location.href="home.html";
+          }
+          else if(result.code==400){
+            alert("账号或密码错误");
+          }
+        },
+        complete(xhr,data){
+          var token = xhr.getResponseHeader("Authorization");
+          addCookie("token",token,7200);
+        }
+      });
+    }
+  }
+
+  function teacherRegiste() {
+    let username=$("#username").val().trim();
+    let newpassword=$("#newpassword").val().trim();
+    let repassword=$("#repassword").val().trim();
+    let email=$("#email").val().trim();
+    let school=$("#schoolselected option:selected").text();
+    if(check(username,newpassword,repassword,school)){
+      var obj = JSON.stringify({
+        "phone": phone,
+        "password": newpassword,
+        "username": username,
+        "school": school,
+        "email": email
+      })
+      $.ajax({
+        async: true,
+        type:'post',
+        url: RequestURL+"/teacher/save",
+        data: obj,
+        contentType:"application/json",
+        success: function(data) {
+          if(data.status===200){
+            alert('注册成功');
+            window.location.href="login.html";
+          }else{
+            alert(data.msg);
+          }
+        }
+      });
+    }
+  }
+
+  function check(username,password){
+    if(username==''||username==null||password==''||password==null) {
+      alert("请输入用户名/密码");
+      return false;
+    }
+    return true;
+  }
+
+  function check1(){
+    if(username.value==''||username.value==null) {
+      alert("请输入用户名");
+      return false;
+    }
+    return true;
+  }
+  function check2(){
+    if(newpassword.value==''||newpassword.value==null) {
+      alert("请输入密码");
+      return false;
+    }
+    return true;
+  }
+  function validate() {
+    var newpassword = document.getElementById("newpassword").value;
+    var repassword = document.getElementById("repassword").value;
+    if(newpassword == repassword) {
+      document.getElementById("tishi").innerHTML="<font color='green'>两次密码相同</font>";
+      document.getElementById("submit").disabled = false;
+    }
+    else {
+      document.getElementById("tishi").innerHTML="<font color='red'>两次密码不相同</font>";
+      document.getElementById("submit").disabled = true;
+    }
+  }
+  //检查手机号码格式
+  function checkphone(){
+    var phone = document.getElementById('phone').value;
+    if(!(/^1[3|4|5|6|7|8|9]\d{9}$/.test(phone))){
+      alert("手机号码有误，请重填");
+      return false;
+    }
+  }
+
+  // 检查输入的数据是不是邮箱格式
+  function checkemail(){
+    var email = document.getElementById("email");
+    //获取email控件对象
+    var reg =/^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/;
+    //正则表达式
+    if (!reg.test(email.value)) {
+      alert("邮箱格式错误，请重新输入！");
+      return false;
+      document.getElementById("email").value="";
+    }
+  }
+</script>
+</html>
